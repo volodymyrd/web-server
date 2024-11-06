@@ -1,0 +1,14 @@
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+rust-version = "1.81.0"
+repository = "https://github.com/volodymyrd/web-server"
+
+[workspace]
+resolver = "2"
+members = ["cli"]
+
+[workspace.dependencies]
+
+# internal
+cli = { path = "cli" }
