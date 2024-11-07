@@ -1,4 +1,4 @@
-use server::Server;
+use server::{Server, ServerConfig};
 
 use tracing::info;
 use tracing_subscriber::filter::ParseError;
@@ -11,9 +11,14 @@ pub type Error = Box<dyn std::error::Error + Send + Sync>;
 fn main() -> Result<(), Error> {
     init_logging(init_env_filter()?)?;
 
-    info!(target: "main", "Starting a server...");
+    let server_config = ServerConfig {
+        host: String::from("127.0.0.1"),
+        port: 7879,
+    };
 
-    Server::start()?;
+    info!(target: "main", "Starting a server with {server_config:?}...");
+
+    Server::start(server_config)?;
 
     Ok(())
 }

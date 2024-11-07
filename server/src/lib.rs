@@ -2,13 +2,19 @@ use std::io::{BufRead, BufReader, Error, Write};
 use std::net::{TcpListener, TcpStream};
 use tracing::{debug, info};
 
+#[derive(Debug)]
+pub struct ServerConfig {
+    pub host: String,
+    pub port: u16,
+}
+
 pub struct Server {
     listener: TcpListener,
 }
 
 impl Server {
-    pub fn start() -> Result<(), Error> {
-        let server = Server::new()?;
+    pub fn start(config: ServerConfig) -> Result<(), Error> {
+        let server = Server::new(config)?;
 
         for stream in server.listener.incoming() {
             let stream = stream?;
@@ -19,8 +25,8 @@ impl Server {
         Ok(())
     }
 
-    fn new() -> Result<Self, Error> {
-        let listener = TcpListener::bind("127.0.0.1:7878")?;
+    fn new(config: ServerConfig) -> Result<Self, Error> {
+        let listener = TcpListener::bind(format!("{}:{}", config.host, config.port))?;
 
         Ok(Self { listener })
     }
