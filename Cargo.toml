@@ -9,9 +9,10 @@ resolver = "2"
 members = ["cli", "server"]
 
 [workspace.dependencies]
+clap = { version = "4.5.20", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # internal
-cli = { path = "cli" }
+ws-cli = { path = "cli" }
 server = { path = "server" }
