@@ -12,13 +12,16 @@ use tracing_subscriber::{fmt, EnvFilter};
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
 
+const DEFAULT_HOST: &str = "127.0.0.1";
+const DEFAULT_PORT: u16 = 7878;
+
 fn main() -> Result<(), Error> {
     init_logging(init_env_filter()?)?;
 
     let cli = Cli::parse();
 
-    let host = cli.host.unwrap_or(String::from("127.0.0.1"));
-    let port = cli.port.unwrap_or(7878);
+    let host = cli.host.unwrap_or(String::from(DEFAULT_HOST));
+    let port = cli.port.unwrap_or(DEFAULT_PORT);
 
     let server_config = ServerConfig { host, port };
 

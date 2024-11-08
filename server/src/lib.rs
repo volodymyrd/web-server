@@ -1,3 +1,5 @@
+use std::fs::read_to_string;
+use std::io;
 use std::io::{BufRead, BufReader, Error, Write};
 use std::net::{TcpListener, TcpStream};
 use tracing::{debug, info};
@@ -12,6 +14,13 @@ pub struct Server {
     listener: TcpListener,
 }
 
+const GET_HELLO: &str = "GET /hello HTTP/1.1";
+const RESPONSE_STATUS_200: &str = "HTTP/1.1 200 OK\r\n\r\n";
+const RESPONSE_STATUS_404: &str = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
+
+const RESPONSE_BODY_HELLO: &str = "html/hello.html";
+const RESPONSE_BODY_404: &str = "html/404.html";
+
 impl Server {
     pub fn start(config: ServerConfig) -> Result<(), Error> {
         let server = Server::new(config)?;
@@ -20,7 +29,7 @@ impl Server {
             let stream = stream?;
 
             info!(target: "server", "Connection established!");
-            server.handle_request(stream);
+            server.handle_request(stream)?;
         }
         Ok(())
     }
@@ -31,7 +40,7 @@ impl Server {
         Ok(Self { listener })
     }
 
-    fn handle_request(&self, mut stream: TcpStream) {
+    fn handle_request(&self, mut stream: TcpStream) -> io::Result<()> {
         let buf_reader = BufReader::new(&mut stream);
         let http_request: Vec<_> = buf_reader
             .lines()
@@ -41,8 +50,17 @@ impl Server {
 
         debug!(target: "server", "Request: {http_request:#?}");
 
-        let response = "HTTP/1.1 200 OK\r\n\r\n";
+        let (status_line, filename) =
+            if !http_request.is_empty() && http_request[0].starts_with(GET_HELLO) {
+                (RESPONSE_STATUS_200, RESPONSE_BODY_HELLO)
+            } else {
+                (RESPONSE_STATUS_404, RESPONSE_BODY_404)
+            };
+
+        let contents = read_to_string(filename)?;
+        let response = format!("{status_line}{contents}");
 
         stream.write_all(response.as_bytes()).unwrap();
+        Ok(())
     }
 }
