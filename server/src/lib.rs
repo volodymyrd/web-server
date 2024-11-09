@@ -50,12 +50,13 @@ impl Server {
 
         debug!(target: "server", "Request: {http_request:#?}");
 
-        let (status_line, filename) =
-            if !http_request.is_empty() && http_request[0].starts_with(GET_HELLO) {
-                (RESPONSE_STATUS_200, RESPONSE_BODY_HELLO)
-            } else {
-                (RESPONSE_STATUS_404, RESPONSE_BODY_404)
-            };
+        let (status_line, filename) = match http_request.first() {
+            Some(val) => match val.as_str() {
+                GET_HELLO => (RESPONSE_STATUS_200, RESPONSE_BODY_HELLO),
+                _ => (RESPONSE_STATUS_404, RESPONSE_BODY_404),
+            },
+            None => (RESPONSE_STATUS_404, RESPONSE_BODY_404),
+        };
 
         let contents = read_to_string(filename)?;
         let response = format!("{status_line}{contents}");
