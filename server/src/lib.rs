@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 use std::io;
-use std::io::{BufRead, BufReader, Error, Write};
+use std::io::{BufRead, Write};
 use std::net::{TcpListener, TcpStream};
 use tracing::{debug, info};
 
@@ -22,7 +22,7 @@ const RESPONSE_BODY_HELLO: &str = "html/hello.html";
 const RESPONSE_BODY_404: &str = "html/404.html";
 
 impl Server {
-    pub fn start(config: ServerConfig) -> Result<(), Error> {
+    pub fn start(config: ServerConfig) -> Result<(), io::Error> {
         let server = Server::new(config)?;
 
         for stream in server.listener.incoming() {
@@ -34,14 +34,14 @@ impl Server {
         Ok(())
     }
 
-    fn new(config: ServerConfig) -> Result<Self, Error> {
+    fn new(config: ServerConfig) -> Result<Self, io::Error> {
         let listener = TcpListener::bind(format!("{}:{}", config.host, config.port))?;
 
         Ok(Self { listener })
     }
 
     fn handle_request(&self, mut stream: TcpStream) -> io::Result<()> {
-        let buf_reader = BufReader::new(&mut stream);
+        let buf_reader = io::BufReader::new(&mut stream);
         let http_request: Vec<_> = buf_reader
             .lines()
             .map_while(Result::ok)
