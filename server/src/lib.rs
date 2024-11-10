@@ -1,7 +1,8 @@
 use std::fs::read_to_string;
-use std::io;
 use std::io::{BufRead, Write};
 use std::net::{TcpListener, TcpStream};
+use std::time::Duration;
+use std::{io, thread};
 use tracing::{debug, info};
 
 #[derive(Debug)]
@@ -15,10 +16,12 @@ pub struct Server {
 }
 
 const GET_HELLO: &str = "GET /hello HTTP/1.1";
+const GET_SLEEP: &str = "GET /sleep HTTP/1.1";
 const RESPONSE_STATUS_200: &str = "HTTP/1.1 200 OK\r\n\r\n";
 const RESPONSE_STATUS_404: &str = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
 
 const RESPONSE_BODY_HELLO: &str = "html/hello.html";
+const RESPONSE_BODY_SLEEP: &str = "html/sleep.html";
 const RESPONSE_BODY_404: &str = "html/404.html";
 
 impl Server {
@@ -53,6 +56,10 @@ impl Server {
         let (status_line, filename) = match http_request.first() {
             Some(val) => match val.as_str() {
                 GET_HELLO => (RESPONSE_STATUS_200, RESPONSE_BODY_HELLO),
+                GET_SLEEP => {
+                    thread::sleep(Duration::from_secs(10));
+                    (RESPONSE_STATUS_200, RESPONSE_BODY_SLEEP)
+                }
                 _ => (RESPONSE_STATUS_404, RESPONSE_BODY_404),
             },
             None => (RESPONSE_STATUS_404, RESPONSE_BODY_404),
