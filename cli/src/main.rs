@@ -15,7 +15,8 @@ pub type Error = Box<dyn std::error::Error + Send + Sync>;
 const DEFAULT_HOST: &str = "127.0.0.1";
 const DEFAULT_PORT: u16 = 7878;
 
-fn main() -> Result<(), Error> {
+#[tokio::main]
+async fn main() -> Result<(), Error> {
     init_logging(init_env_filter()?)?;
 
     let cli = Cli::parse();
@@ -27,7 +28,7 @@ fn main() -> Result<(), Error> {
 
     info!(target: "main", "Starting a server with {server_config:?}...");
 
-    Server::start(server_config)?;
+    Server::start(server_config).await?;
 
     Ok(())
 }
